@@ -5,6 +5,18 @@ var { getAllDepositEvents, getAccountDepositEvents } = require('./utils/events.j
 async function getDeposits() {
     depositEvents = await getAllDepositEvents()
 
+    // console.log('depositEvents: ', depositEvents);
+
+    //check if ./data/deposits-events.json exists, if it does, return
+    // if (fs.existsSync('./data/deposits-events.json')) {
+    //     console.log('deposits-events.json already exists, skipping...');
+    //     return;
+    // }
+
+    await fs.writeFileSync(`./data/deposits-events-raw.json`, JSON.stringify(depositEvents, null, 4));
+
+    // console.log('Object.keys(depositEvents): ', Object.keys(depositEvents));
+
     let deposits = depositEvents.reduce((acc, d, i) => {
         let account = d.returnValues.account
         if (!acc[account]) acc[account] = {}
@@ -25,7 +37,10 @@ async function getDeposits() {
             let bdv = amount.mul(acc[account][token][season].bdv).div(acc[account][token][season].amount)
             acc[account][token][season].amount = acc[account][token][season].amount.sub(amount)
             acc[account][token][season].bdv = acc[account][token][season].bdv.sub(bdv)
-            if (acc[account][token][season].amount.eq(web3.utils.toBN('0'))) delete acc[account][token][season]
+            if (acc[account][token][season].amount.eq(web3.utils.toBN('0'))) {
+                delete acc[account][token][season];
+                // acc[account] = {};
+            }
         } else if (d.event == 'RemoveDeposits') {
             let seasons = d.returnValues.seasons
             let amounts = d.returnValues.amounts
@@ -35,19 +50,25 @@ async function getDeposits() {
                     let bdv = amount.mul(acc[account][token][seasons[i]].bdv).div(acc[account][token][seasons[i]].amount)
                     acc[account][token][seasons[i]].amount = acc[account][token][seasons[i]].amount.sub(amount)
                     acc[account][token][seasons[i]].bdv = acc[account][token][seasons[i]].bdv.sub(bdv)
-                    if (acc[account][token][seasons[i]].amount.eq(web3.utils.toBN('0'))) delete acc[account][token][seasons[i]]
+                    if (acc[account][token][seasons[i]].amount.eq(web3.utils.toBN('0'))) {
+                        delete acc[account][token][seasons[i]];
+                        // acc[account] = {};
+                    }
                 }
             }
         }
-        if (Object.keys(acc[account]) == 0) delete acc[account]
         return acc;
     }, {})
 
     Object.keys(deposits).forEach((account) => {
         Object.keys(deposits[account]).forEach((token) => {
             Object.keys(deposits[account][token]).forEach((season) => {
-                deposits[account][token][season].amount = `${deposits[account][token][season].amount}`
-                deposits[account][token][season].bdv = `${deposits[account][token][season].bdv}`
+                if (deposits[account][token][season].amount) {
+                    deposits[account][token][season].amount = `${deposits[account][token][season].amount}`
+                    deposits[account][token][season].bdv = `${deposits[account][token][season].bdv}`
+                } else {
+                    console.log('not touching this one: ', account);
+                }
             })
         })
     })
