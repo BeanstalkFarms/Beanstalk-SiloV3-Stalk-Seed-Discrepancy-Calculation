@@ -12,7 +12,7 @@ var multicallAbi = require('../abi/Multicall.json')
 var beanstalk = new web3.eth.Contract(beanstalkAbi, BEANSTALK_ADDRESS)
 var multicall = new web3.eth.Contract(multicallAbi, MULTICALL_ADDRESS)
 
-const ALCHEMY_KEY = "ERW98ukfkBwf8Lca8F3VffpTAqzqFT88"
+const ALCHEMY_KEY = "<ALCHEMY_KEY>"
 
 const config = {
     apiKey: ALCHEMY_KEY,
