@@ -1,6 +1,5 @@
 var { web3, beanstalk } = require('./utils/web3.js')
 var fs = require('fs');
-var { getAllDepositEvents } = require('./utils/events.js')
 
 async function getStalkSeeds(blockNumber) {
     const deposits = JSON.parse(await fs.readFileSync('./data/deposits-events.json'))

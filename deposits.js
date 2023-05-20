@@ -2,8 +2,8 @@ var { web3 } = require('./utils/web3.js')
 var fs = require('fs');
 var { getAllDepositEvents, getAccountDepositEvents } = require('./utils/events.js')
 
-async function getDeposits() {
-    depositEvents = await getAllDepositEvents()
+async function getDeposits(blockNumber) {
+    depositEvents = await getAllDepositEvents(blockNumber)
 
     // console.log('depositEvents: ', depositEvents);
 

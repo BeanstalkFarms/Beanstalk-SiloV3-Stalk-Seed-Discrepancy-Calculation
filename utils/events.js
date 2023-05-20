@@ -46,7 +46,7 @@ async function getAllDepositEvents(blockNumber) {
 
 }
 
-async function getAccountDepositEvents(account, blockNumber) {
+/*async function getAccountDepositEvents(account, blockNumber) {
     const settings = {
         fromBlock: START_BLOCK,
         toBlock: blockNumber,
@@ -65,5 +65,5 @@ async function getAccountDepositEvents(account, blockNumber) {
     return depositEvents
 }
 
-exports.getAccountDepositEvents = getAccountDepositEvents
+exports.getAccountDepositEvents = getAccountDepositEvents*/
 exports.getAllDepositEvents = getAllDepositEvents

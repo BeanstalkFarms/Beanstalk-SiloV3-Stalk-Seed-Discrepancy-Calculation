@@ -1,6 +1,5 @@
 var { web3, beanstalk } = require('./utils/web3.js')
 var fs = require('fs');
-var { getAllDepositEvents } = require('./utils/events.js')
 var { getSeedsFromDeposits, getStalkFromDeposits } = require('./utils/silo.js')
 
 
@@ -26,6 +25,7 @@ async function getStalkSeeds(blockNumber) {
 
     const season = web3.utils.toBN(web3.eth.abi.decodeParameter('uint256', rawSeasonValue));
 
+    console.log('for season: ', season);
 
     for (let a = 0; a < Object.keys(deposits).length; a++) {
         const account = Object.keys(deposits)[a]
