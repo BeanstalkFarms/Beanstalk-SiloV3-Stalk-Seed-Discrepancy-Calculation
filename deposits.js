@@ -15,6 +15,15 @@ async function getDeposits(blockNumber) {
 
     await fs.writeFileSync(`./data/deposits-events-raw.json`, JSON.stringify(depositEvents, null, 4));
 
+    //loop through all depositEvents, store unique accounts into an array
+    let accounts = []
+    depositEvents.forEach((d) => {
+        if (!accounts.includes(d.returnValues.account)) accounts.push(d.returnValues.account)
+    })
+    console.log('accounts: ', accounts);
+    //write unique accounts to farmers.json
+    await fs.writeFileSync(`./data/farmers.json`, JSON.stringify(accounts, null, 4));
+
     // console.log('Object.keys(depositEvents): ', Object.keys(depositEvents));
 
     let deposits = depositEvents.reduce((acc, d, i) => {
