@@ -45,7 +45,7 @@ async function getStalkSeeds() {
 
     }
     await fs.writeFileSync(`./data/seed-discrepencies.json`, JSON.stringify(seedDiscrepencies, null, 4));
-    await fs.writeFileSync(`./data/stalk-discrepencies.json`, JSON.stringify(seedDiscrepencies, null, 4));
+    await fs.writeFileSync(`./data/stalk-discrepencies.json`, JSON.stringify(stalkDiscrepencies, null, 4));
     await fs.writeFileSync(`./data/seed-stalk-discrepencies.json`, JSON.stringify(stalkSeedDiscrepencies, null, 4));
     await fs.writeFileSync(`./data/seed-stalk-discrepencies.csv`, stalkSeedDiscrepencies.join('\n'))
 }
