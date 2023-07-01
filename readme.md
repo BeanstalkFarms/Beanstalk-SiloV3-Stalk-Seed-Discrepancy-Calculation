@@ -2,7 +2,7 @@
 1. Replace `<RPC_URL>` in `./utils/web3.js` with a valid RPC url
 2. run `npm install`
 3. run `node main.js`
-4. output will be saved in: `seed-stalk-discrepencies.json` and `seed-stalk-discrepencies.csv`
+4. output will be saved in: `seed-stalk-discrepancies.json` and `seed-stalk-discrepancies.csv`
 
 # Script Breakdown:
 
@@ -14,4 +14,4 @@
 
 - `stalkSeedsOnChain.js` -> Get the Stalk, Grown Stalk, Earned Stalk and Seeds for each account with at least 1 Deposit. `countedStalk` and `countedSeeds` are the values that should be used to compare. Outputs in `stalkSeeds-onchain.json`
 
-- `calcStalkSeedDiscrencies.js` -> Compute the discrepencies between the Stalk/Seed on-chain balances and the computed Stalk/Seed balances
+- `calcStalkSeedDiscrencies.js` -> Compute the discrepancies between the Stalk/Seed on-chain balances and the computed Stalk/Seed balances
