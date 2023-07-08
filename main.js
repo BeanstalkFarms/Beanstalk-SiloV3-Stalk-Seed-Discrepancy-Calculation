@@ -6,10 +6,13 @@ const {calcStalkSeedDiscrepancies} = require('./calcStalkSeedDiscrepancies');
 const {getStalkSeeds} = require('./stalkSeedsOnChain');
 
 (async () => {
+    
+    console.time("Execution Time");
     if (!fs.existsSync('./data')){
         fs.mkdirSync('./data');
     }
-    let blockNumber = 17251905;
+    let blockNumber = 17630006;
+
 
     //ebip 8 was deployed at 17251905
 
@@ -24,4 +27,6 @@ const {getStalkSeeds} = require('./stalkSeedsOnChain');
     await getStalkSeeds(blockNumber)
     console.log("Calculating Discrepancies...")
     await calcStalkSeedDiscrepancies(blockNumber)
+
+    console.timeEnd("Execution Time");
 })();

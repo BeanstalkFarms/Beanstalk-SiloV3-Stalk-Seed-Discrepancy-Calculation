@@ -1,3 +1,4 @@
+const fs = require('fs');
 var { beanstalk } = require('./web3.js')
 
 const START_BLOCK = 0
@@ -18,21 +19,67 @@ async function getAllDepositEvents(blockNumber) {
         15358963,
         15608963,
         16008963,
+        16308963,
+        16608963,
+        17008963,
+        17308963,
+        17608963,
         blockNumber
     ]
 
     let depositEvents = await Promise.all(
         block_intervals.map((block, i) => {
             if (i == block_intervals.length-1) return []
+            const fromBlock = block;
+            const toBlock = block_intervals[i+1] !== blockNumber ? block_intervals[i+1]-1 : blockNumber;
             let settings_ = {
-                fromBlock: block,
-                toBlock: block_intervals[i+1] !== blockNumber ? block_intervals[i+1]-1 : blockNumber,
+                fromBlock: fromBlock,
+                toBlock: toBlock,
             }
-            return Promise.all([
+
+            const cacheFileName = `./data/cache-deposits-events-${fromBlock}-${toBlock}.json`
+
+            if (fs.existsSync(cacheFileName)) {
+                console.log(`Found cache file, returning these events: ${cacheFileName}`)
+                return JSON.parse(fs.readFileSync(cacheFileName))
+            }
+
+            const thisRangeOfEvents = Promise.all([
                 beanstalk.getPastEvents('AddDeposit', settings_),
                 beanstalk.getPastEvents('RemoveDeposits', settings_),
                 beanstalk.getPastEvents('RemoveDeposit', settings_),
             ])
+
+            //save thisRangeOfEvents to cache file
+            thisRangeOfEvents.then((events) => {
+                console.log("Saving cache file: ", cacheFileName);
+                fs.writeFileSync(cacheFileName, JSON.stringify(events))
+            })
+
+            //if this is the last block_interval, save the addresses to a latest_addresses file
+            if (i == block_intervals.length-2) {
+                thisRangeOfEvents.then((events) => {
+                    if (events.length == 0) return;
+                    const addresses = Array.from(
+                      new Set(
+                        events[0].map((e) => {
+                          if (e.returnValues) {
+                            return e.returnValues.account;
+                          } else {
+                            console.log("no return values for event: ", e);
+                          }
+                        })
+                      )
+                    );
+
+
+                    const latest_addresses_file = `./data/latest_addresses.json`
+                    console.log("Saving latest addresses file: ", latest_addresses_file);
+                    fs.writeFileSync(latest_addresses_file, JSON.stringify(addresses))
+                })
+            }
+
+            return thisRangeOfEvents;
         })
     )
 
