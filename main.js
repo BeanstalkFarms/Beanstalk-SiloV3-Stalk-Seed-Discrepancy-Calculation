@@ -11,7 +11,7 @@ const {getStalkSeeds} = require('./stalkSeedsOnChain');
     if (!fs.existsSync('./data')){
         fs.mkdirSync('./data');
     }
-    let blockNumber = 17630006;
+    let blockNumber = 17667300;
 
 
     //ebip 8 was deployed at 17251905

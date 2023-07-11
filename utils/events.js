@@ -41,7 +41,7 @@ async function getAllDepositEvents(blockNumber) {
 
             if (fs.existsSync(cacheFileName)) {
                 console.log(`Found cache file, returning these events: ${cacheFileName}`)
-                return JSON.parse(fs.readFileSync(cacheFileName))
+                return JSON.parse(fs.readFileSync(cacheFileName))   
             }
 
             const thisRangeOfEvents = Promise.all([
