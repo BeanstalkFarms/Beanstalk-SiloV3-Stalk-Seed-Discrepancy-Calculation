@@ -32,3 +32,4 @@ exports.beanstalk = beanstalk
 exports.multicall = multicall
 exports.BEANSTALK_ADDRESS = BEANSTALK_ADDRESS
 exports.MULTICALL_ADDRESS = MULTICALL_ADDRESS
+exports.RPC_URL = RPC_URL

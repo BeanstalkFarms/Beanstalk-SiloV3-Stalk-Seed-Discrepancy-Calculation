@@ -18,6 +18,13 @@ async function getAllDepositEvents(blockNumber) {
         15358963,
         15608963,
         16008963,
+        /*16308963,
+        16608963,
+        17008963,
+        17308963,
+        17608963,
+        18008963,
+        18308963,*/
         blockNumber
     ]
 
