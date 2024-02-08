@@ -105,9 +105,24 @@ const decodeFarmData = async (decodedCallData, txid, beanstalkAbi, beanContract)
 
     if (funcName == "farm(bytes[])") {
       //decode calldata in tx.data
-      var decodedCallData = beanContract.interface.decodeFunctionData("farm", tx.data)[0][0];
+      var fullArgumentCallAsString = "";
+      var decodedCallData = beanContract.interface.decodeFunctionData("farm", tx.data)[0];
+      for (var i = 0; i < decodedCallData.length; i++) {
+        var decodedFunctionCall = decodedCallData[i];
+        fullArgumentCallAsString += '\n'+await decodeFarmData(decodedFunctionCall, txid, beanstalkAbi, beanContract);
+      }
+      
+      return fullArgumentCallAsString;
+    } else if (funcName == "advancedFarm(bytes[])") {
+      console.log('found and doing an advanced farm call');
+      //decode calldata in tx.data
+      var fullArgumentCallAsString = "";
+      var decodedCallData = beanContract.interface.decodeFunctionData("advancedFarm", tx.data)[0];
+      for (var i = 0; i < decodedCallData.length; i++) {
+        var decodedFunctionCall = decodedCallData[i];
+        fullArgumentCallAsString += '\n'+await decodeFarmData(decodedFunctionCall, txid, beanstalkAbi, beanContract);
+      }
 
-      fullArgumentCallAsString = decodeFarmData(decodedCallData, txid, beanstalkAbi, beanContract);
       return fullArgumentCallAsString;
     } else {
       return "not a farm function " + txid;

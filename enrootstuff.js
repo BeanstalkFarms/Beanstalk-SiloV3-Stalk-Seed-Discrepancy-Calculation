@@ -5,7 +5,7 @@ require("@nomicfoundation/hardhat-toolbox");
 const { RPC_URL } = require('./utils/web3.js');
 const { decodeFarm } = require('./decodeFarm.js');
 
-const LATEST_BLOCK = 18703853;
+const LATEST_BLOCK = 19173100;
 const SILOV3_DEPLOYMENT = 17671557;
 
 const FORK_BLOCK_NUMBER = LATEST_BLOCK;
@@ -150,12 +150,12 @@ const QUERY_EVENTS_START_BLOCK = SILOV3_DEPLOYMENT;
     
     let decoded = await decodeFarm(txid, provider, beanstalkAbi, beanContract);
 
-    // console.log(i, 'decoded: ', decoded);
+    console.log(i, 'decoded: ', decoded);
 
-    if (decoded.includes('enrootDeposits')) {
+    if (decoded.includes('enrootDeposit')) {
       const tx = await provider.getTransaction(txid);
 
-      console.log('Found an enroot deposit! sender: ', tx);
+      // console.log('Found an enroot deposit! sender: ', tx);
 
       addressesThatDidAnEnroot.push(tx.from);
     }
@@ -203,7 +203,7 @@ const QUERY_EVENTS_START_BLOCK = SILOV3_DEPLOYMENT;
     }
   }
 
-  console.log('addressesThatDidAnEnroot: ', addressesThatDidAnEnroot);
+  console.log('addressesThatDidAnEnroot: ', addressesThatDidAnEnroot.length);
 
   console.log("done");
 })();
