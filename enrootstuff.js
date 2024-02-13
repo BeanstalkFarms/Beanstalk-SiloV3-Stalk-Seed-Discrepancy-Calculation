@@ -2,7 +2,7 @@ const fs = require("fs");
 require("dotenv").config();
 const { network, ethers } = require("hardhat");
 require("@nomicfoundation/hardhat-toolbox");
-const { RPC_URL } = require('./utils/web3.js');
+const { RPC_URL, alchemy } = require('./utils/web3.js');
 const { decodeFarm } = require('./decodeFarm.js');
 
 const LATEST_BLOCK = 19173100;
@@ -131,9 +131,28 @@ const QUERY_EVENTS_START_BLOCK = SILOV3_DEPLOYMENT;
     transactionsWithARemoveDepositEvent.push(event.transactionHash);
   }
 
+  // for (let i = 0; i < transactionsWithARemoveDepositEvent.length; i++) {
+  //   let txid = transactionsWithARemoveDepositEvent[i];
+  //   console.log('txid: ', txid);
+
+  //   //call debug_traceTransaction
+  //   // const trace = await provider.send("debug_traceTransaction", [txid, {}]);
+  //   // console.log('trace: ', trace);
+
+  //   let txTrace = await alchemy.debug.traceTransaction(txid, {
+  //     type: "callTracer",
+  //   });
+
+  //   console.log('txTrace: ', txTrace);
+
+  //   return;
+  // }
+  
+
+
   //loop through transactions with a remove deposit event and only include those who's function calls include farm with enrootDeposits or plain enrootDeposits
 
-  const addressesThatDidAnEnroot = [];
+  var addressesThatDidAnEnroot = [];
 
   console.log('transactionsWithARemoveDepositEvent.length: ', transactionsWithARemoveDepositEvent.length);
 
@@ -160,11 +179,12 @@ const QUERY_EVENTS_START_BLOCK = SILOV3_DEPLOYMENT;
       addressesThatDidAnEnroot.push(tx.from);
     }
 
-    if (decoded.includes('not a farm function')) {
+    if (decoded.includes('not a farm function') || decoded.includes("Error decoding arguments")) {
       //is tx from 0x21de18b6a8f78ede6d16c50a167f6b222dc08df7? if yes then it is gnosis safe
       const tx = await provider.getTransaction(txid);
       
-      if (tx.to == '0x9662C8E686fe84F468a139b10769D65665c344F9') {
+      //now with txn traces we can make sure there's no enroot call in there
+      /*if (tx.to == '0x9662C8E686fe84F468a139b10769D65665c344F9') {
         //ignore, this is a "bot" address, it didn't do any enroot txns
       } else if (tx.to == '0x9f15DE1a169D3073f8fBA8de79E4BA519b19C64D') {
         //skip this one, seems to be another upgradable proxy and doesn't call enroot
@@ -188,19 +208,59 @@ const QUERY_EVENTS_START_BLOCK = SILOV3_DEPLOYMENT;
         //this is a gnosis safe with call to transfer deposits, no enroot
       } else if (txid == '0x41d94fb2bd6a4e90a4f801bfd0617b1a5f880e2396eda4ef3895451c8cee36b4') {
         //this is a gnosis safe with call to transfer deposits, no enroot
-      } 
-      else {
-        console.log('investigate this tx: ', tx);
+      } */
+      
+        // console.log('investigate this tx: ', tx);
+
+        //get full trace from alchemy
+
+        //if there are any inputs which contain 0x0b58f073 or 0x88fcd169, these are the selectors
+        //for enrootDeposit and enrootDeposits, so we know they did an enroot call
+
+      
+      function didEnrootCall(trace) {
+        if (trace.calls) {
+          for (let i = 0; i < trace.calls.length; i++) {
+            let call = trace.calls[i];
+            if (call.input.includes('0x0b58f073') || call.input.includes('0x88fcd169')) {
+              return true;
+            }
+            if (call.calls) {
+              //recurse
+              if (didEnrootCall(call)) {
+                return true;
+              }
+            }
+          }
+        }
+        return false;
       }
-    }
 
-    if (decoded.includes("Error decoding arguments")) {
-      const tx = await provider.getTransaction(txid);
+      let txTrace = await alchemy.debug.traceTransaction(txid, {
+        type: "callTracer",
+      });
 
-      if (tx.id == '0x900364272524b136fd4f9b80ee4f4135babaadfa788316e597649f79471dc287') {
+      var didAnEnrootCall = didEnrootCall(txTrace);
+      if (didAnEnrootCall) {
+        console.log('yes this tx did an enroot: ', txid);
         addressesThatDidAnEnroot.push(tx.from);
+      } else {
+        console.log('no this tx did not do an enroot: ', txid);
       }
+
+      
     }
+
+    //remove duplicates in addressesThatDidAnEnroot
+    addressesThatDidAnEnroot = [...new Set(addressesThatDidAnEnroot)];
+
+    // if (decoded.includes("Error decoding arguments")) {
+    //   const tx = await provider.getTransaction(txid);
+
+    //   if (tx.id == '0x900364272524b136fd4f9b80ee4f4135babaadfa788316e597649f79471dc287') {
+    //     addressesThatDidAnEnroot.push(tx.from);
+    //   }
+    // }
   }
 
   console.log('addressesThatDidAnEnroot: ', addressesThatDidAnEnroot.length);

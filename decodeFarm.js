@@ -21,8 +21,8 @@ const decodeFarmData = async (decodedCallData, txid, beanstalkAbi, beanContract)
     try {
       args = beanContract.interface.decodeFunctionData(funcName, argData);
     } catch (error) {
-      console.log('caught some error: ', error);
-      console.log('error was for txid: ', txid);
+      console.log('decodeFarmData caught some error: ', error);
+      console.log('decodeFarmData error was for txid: ', txid, ' and funcName: ', funcName, ' and argData: ', argData);
       return "Error decoding arguments";
     }
     
@@ -73,12 +73,19 @@ const decodeFarmData = async (decodedCallData, txid, beanstalkAbi, beanContract)
       const functionFragment = beanstalkAbi.find((item) => {
           //generate the selector from the function name
           var fullFunctionName = item.name + '(' + item.inputs.map((input) => input.type).join(',') + ')';
-  
+          
           //.id function does a keccak256
           var funcSelector = ethers.id(fullFunctionName);
-          //get first 10 bytes
           funcSelector = funcSelector.slice(0, 10);
-          return item.type === "function" && funcSelector === selector;
+
+          //if it contains a 0x0, replace with 0x, because this is what eth does apparently
+          if (funcSelector.includes('0x0')) {
+            funcSelector = funcSelector.replace('0x0', '0x');
+          }
+
+          // console.log('searching for:', selector, funcSelector, 'fullFunctionName: ', fullFunctionName);
+          //get first 10 bytes
+          return funcSelector === selector;
       });
   
       if (functionFragment) {
@@ -89,7 +96,7 @@ const decodeFarmData = async (decodedCallData, txid, beanstalkAbi, beanContract)
           return "Function not found for the given selector " + selector;
       }
     } catch (error) {
-      console.log('caught some error: ', error);
+      console.log('getFunctionNameFromSelector caught some error: ', error);
       return "Error decoding selector";
     }
   }
@@ -109,7 +116,8 @@ const decodeFarmData = async (decodedCallData, txid, beanstalkAbi, beanContract)
       var decodedCallData = beanContract.interface.decodeFunctionData("farm", tx.data)[0];
       for (var i = 0; i < decodedCallData.length; i++) {
         var decodedFunctionCall = decodedCallData[i];
-        fullArgumentCallAsString += '\n'+await decodeFarmData(decodedFunctionCall, txid, beanstalkAbi, beanContract);
+        if (i>0) fullArgumentCallAsString += '\n';
+        fullArgumentCallAsString += await decodeFarmData(decodedFunctionCall, txid, beanstalkAbi, beanContract);
       }
       
       return fullArgumentCallAsString;
@@ -120,7 +128,8 @@ const decodeFarmData = async (decodedCallData, txid, beanstalkAbi, beanContract)
       var decodedCallData = beanContract.interface.decodeFunctionData("advancedFarm", tx.data)[0];
       for (var i = 0; i < decodedCallData.length; i++) {
         var decodedFunctionCall = decodedCallData[i];
-        fullArgumentCallAsString += '\n'+await decodeFarmData(decodedFunctionCall, txid, beanstalkAbi, beanContract);
+        if (i>0) fullArgumentCallAsString += '\n';
+        fullArgumentCallAsString += await decodeFarmData(decodedFunctionCall, txid, beanstalkAbi, beanContract);
       }
 
       return fullArgumentCallAsString;
